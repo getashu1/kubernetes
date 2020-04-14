@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: demo-prod
+    env: prod
+  name: demo-prod
+  namespace: prod
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: demo-prod
+  strategy:
+    type: RollingUpdate
+  template:
+    spec:
+      containers:
+      - image: <your image>
+        name: demo-prod
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+             memory: "1024Mi"
+             cpu: 1
+          requests:
+             cpu: "10m"
+             memory: "100Mi"
+status: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    env: prod
+  name: "service-demo-prod"
+  namespace: prod
+  annotations:
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+  type: NodePort
+  selector:
+    app: "demo-prod"
